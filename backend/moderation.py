@@ -71,3 +71,4 @@ def sexual_content(text: str) -> bool:
     words = ["sex", "sexy", "sexual", "porn", "porno", "pornography", "blowjob", "handjob", "orgasm", "orgy", "penis", "vagina", "boobs", "boob", "cock", "dick", "pussy", "nude", "nudes", "naked", "horny", "erection", "masturbation", "masturbate", "semen", "anal", "cum", "địt", "đụ", "lồn", "cặc", "buồi", "that's what she said", "thats what she said", "netflix and chill", "size matters", "happy ending", "hard and wet"]
     phrases = ["tinh duc", "khieu dam", "khieu goi", "lam tinh", "duong vat", "am dao", "thu dam", "dit nhau", "dit me", "buoi to"]
     return bool(_has(raw, words) or _has(plain, phrases))
+

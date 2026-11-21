@@ -15,17 +15,17 @@ class TestResults:
         self.passed = []
         self.failed = []
         self.total = 0
-
+    
     def add_pass(self, test_name):
         self.total += 1
         self.passed.append(test_name)
         print(f"✅ PASS: {test_name}")
-
+    
     def add_fail(self, test_name, reason):
         self.total += 1
         self.failed.append({"test": test_name, "reason": reason})
         print(f"❌ FAIL: {test_name} - {reason}")
-
+    
     def summary(self):
         print("\n" + "="*60)
         print(f"BACKEND TEST SUMMARY: {len(self.passed)}/{self.total} passed")
@@ -132,7 +132,7 @@ try:
             results.add_pass("GET state role=host without key returns 403")
         else:
             results.add_fail("GET state 403", f"Got status {r.status_code if r else 'None'}")
-
+        
         # Test POST actions without key
         for action in ["next", "reset", "blackout", "load_demo", "freeze"]:
             r = requests.post(f"{BASE_URL}/rooms/{code}/host/{action}", json={}, timeout=10)
@@ -140,7 +140,7 @@ try:
                 results.add_pass(f"POST {action} without key returns 403")
             else:
                 results.add_fail(f"POST {action} 403", f"Got status {r.status_code}")
-
+        
         # Test with wrong key
         r = requests.post(f"{BASE_URL}/rooms/{code}/host/next",
                          params={"key": "wrong_key"}, json={}, timeout=10)
@@ -160,12 +160,12 @@ try:
     if code and key:
         # Join a team
         dev, tid = join_team(code, "TEST_Team_Alpha")
-
+        
         # Advance to question_open
         for _ in range(3):  # lobby -> cold_open -> round_intro -> question_open
             host_action(code, key, "next")
         time.sleep(0.5)
-
+        
         # Check screen role
         r = get_state(code, "screen")
         if r and r.status_code == 200:
@@ -176,7 +176,7 @@ try:
                 results.add_pass("Screen role: no spoilers before reveal")
             else:
                 results.add_fail("Screen role spoilers", f"Found: {found_spoilers}")
-
+        
         # Check player role
         r = get_state(code, "player", device=dev)
         if r and r.status_code == 200:
@@ -187,7 +187,7 @@ try:
                 results.add_pass("Player sees own secret_word")
             else:
                 results.add_fail("Player secret_word", "Missing secret_word")
-
+            
             # But not spoilers
             banned = ["correct_index", "punchline", "notes", "setup_line", "host_key", "fake_explanations", "hint_joke"]
             found_spoilers = [b for b in banned if b in raw_text]
@@ -231,32 +231,32 @@ try:
             dev, tid = join_team(code, name)
             if dev and tid:
                 teams.append((dev, tid))
-
+        
         if len(teams) == 3:
             results.add_pass("3 teams joined successfully")
-
+            
             # Advance to question_open
             for _ in range(3):
                 host_action(code, key, "next")
             time.sleep(0.5)
-
+            
             r = get_state(code, "host", key=key)
             if r and r.status_code == 200:
                 state = r.json()
                 if state["phase"] == "question_open":
                     results.add_pass("Advanced to question_open phase")
-
+                    
                     q = state["host"]["question"]
                     correct_idx = q["correct_index"]
                     qid = q["id"]
-
+                    
                     # Submit answers: team0 correct, team1 wrong, team2 correct
                     answers = [
                         (teams[0][0], correct_idx),
                         (teams[1][0], (correct_idx + 1) % 4),
                         (teams[2][0], correct_idx)
                     ]
-
+                    
                     for dev, opt in answers:
                         r = requests.post(f"{BASE_URL}/rooms/{code}/answer", json={
                             "device_id": dev,
@@ -268,16 +268,16 @@ try:
                             pass
                         else:
                             print(f"Answer failed: {r.status_code}")
-
+                    
                     time.sleep(0.5)
-
+                    
                     # Check auto-lock
                     r = get_state(code, "screen")
                     if r and r.status_code == 200:
                         state = r.json()
                         if state["phase"] == "question_locked":
                             results.add_pass("Auto-lock after all teams answered")
-
+                            
                             # Verify no spoilers in locked phase
                             raw = r.text
                             if "correct_index" not in raw and "counts" not in raw:
@@ -286,11 +286,11 @@ try:
                                 results.add_fail("Locked phase spoilers", "Found correct_index or counts")
                         else:
                             results.add_fail("Auto-lock", f"Phase is {state['phase']}")
-
+                    
                     # Host reveals
                     host_action(code, key, "next")
                     time.sleep(0.5)
-
+                    
                     r = get_state(code, "screen")
                     if r and r.status_code == 200:
                         state = r.json()
@@ -300,7 +300,7 @@ try:
                                 results.add_pass("Correct answer shown in reveal")
                         else:
                             results.add_fail("Reveal phase", f"Phase is {state['phase']}")
-
+                    
                     # Check player results
                     r = get_state(code, "player", device=teams[0][0])
                     if r and r.status_code == 200:
@@ -312,7 +312,7 @@ try:
                                     results.add_pass("Player 0 points in valid range")
                             else:
                                 results.add_fail("Player 0 result", "Should be correct")
-
+                    
                     r = get_state(code, "player", device=teams[1][0])
                     if r and r.status_code == 200:
                         state = r.json()
@@ -336,18 +336,18 @@ try:
     code, key = create_room()
     if code and key:
         dev, tid = join_team(code, "TEST_Idempotent")
-
+        
         # Advance to question_open
         for _ in range(3):
             host_action(code, key, "next")
         time.sleep(0.5)
-
+        
         r = get_state(code, "host", key=key)
         if r and r.status_code == 200:
             q = r.json()["host"]["question"]
             qid = q["id"]
             crid = uuid.uuid4().hex
-
+            
             # Submit same answer twice with same client_request_id
             body = {
                 "device_id": dev,
@@ -355,10 +355,10 @@ try:
                 "option_index": 0,
                 "client_request_id": crid
             }
-
+            
             r1 = requests.post(f"{BASE_URL}/rooms/{code}/answer", json=body, timeout=10)
             r2 = requests.post(f"{BASE_URL}/rooms/{code}/answer", json=body, timeout=10)
-
+            
             if r1.status_code == 200 and r2.status_code == 200:
                 data1 = r1.json()
                 data2 = r2.json()
@@ -381,21 +381,21 @@ try:
     if code and key:
         # Join early team
         join_team(code, "TEST_Early")
-
+        
         # Advance to question_open
         for _ in range(3):
             host_action(code, key, "next")
         time.sleep(0.5)
-
+        
         # Join late team
         late_dev, late_tid = join_team(code, "TEST_Late")
-
+        
         r = get_state(code, "player", device=late_dev)
         if r and r.status_code == 200:
             state = r.json()
             if state.get("me") and state["me"].get("eligible") is False:
                 results.add_pass("Late joiner marked as ineligible")
-
+                
                 # Try to answer
                 r = get_state(code, "host", key=key)
                 if r and r.status_code == 200:
@@ -424,7 +424,7 @@ try:
     if code and key:
         dev, tid = join_team(code, "Shit Happens")
         time.sleep(0.3)
-
+        
         r = get_state(code, "screen")
         if r and r.status_code == 200:
             state = r.json()
@@ -432,17 +432,17 @@ try:
             if team:
                 if team["name"] is None:
                     results.add_pass("Flagged team name shows as null on screen")
-
+                    
                     # Check raw JSON doesn't contain the word
                     if "Shit" not in r.text:
                         results.add_pass("Flagged word not in screen JSON")
                     else:
                         results.add_fail("Flagged word leak", "Found 'Shit' in screen JSON")
-
+                    
                     # Approve name
                     host_action(code, key, "team", {"op": "approve_name", "team_id": tid})
                     time.sleep(0.3)
-
+                    
                     r = get_state(code, "screen")
                     if r and r.status_code == 200:
                         state = r.json()
@@ -466,7 +466,7 @@ try:
         # Load demo
         host_action(code, key, "load_demo")
         time.sleep(2.5)  # Wait for demo teams to appear
-
+        
         r = get_state(code, "screen")
         if r and r.status_code == 200:
             state = r.json()
@@ -485,11 +485,11 @@ try:
     code, key = create_room(load_demo=True)
     if code and key:
         time.sleep(2)  # Wait for demo teams
-
+        
         # Enable blackout
         host_action(code, key, "blackout", {"value": True})
         time.sleep(0.3)
-
+        
         r = get_state(code, "screen")
         if r and r.status_code == 200:
             state = r.json()
@@ -500,7 +500,7 @@ try:
                     results.add_pass("Blackout: all team names are null")
                 else:
                     results.add_fail("Blackout names", "Some names not null")
-
+                
                 if state.get("fun_facts") == []:
                     results.add_pass("Blackout: fun_facts empty")
                 else:
@@ -516,20 +516,20 @@ try:
     code, key = create_room()
     if code and key:
         join_team(code, "TEST_Timer")
-
+        
         # Advance to question_open
         for _ in range(3):
             host_action(code, key, "next")
         time.sleep(0.5)
-
+        
         r = get_state(code, "host", key=key)
         if r and r.status_code == 200:
             ends1 = r.json()["phase_ends_at"]
-
+            
             # Add 10s
             host_action(code, key, "add_time")
             time.sleep(0.3)
-
+            
             r = get_state(code, "host", key=key)
             if r and r.status_code == 200:
                 ends2 = r.json()["phase_ends_at"]
@@ -537,22 +537,22 @@ try:
                     results.add_pass("add_time extends phase_ends_at by 10000ms")
                 else:
                     results.add_fail("add_time", f"Expected {ends1 + 10000}, got {ends2}")
-
+            
             # Freeze
             host_action(code, key, "freeze")
             time.sleep(0.3)
-
+            
             r = get_state(code, "screen")
             if r and r.status_code == 200:
                 if r.json().get("frozen") is True:
                     results.add_pass("Freeze sets frozen=true")
                 else:
                     results.add_fail("Freeze", "frozen not true")
-
+            
             # Unfreeze
             host_action(code, key, "freeze")
             time.sleep(0.3)
-
+            
             r = get_state(code, "screen")
             if r and r.status_code == 200:
                 if r.json().get("frozen") is False:

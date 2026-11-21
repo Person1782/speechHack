@@ -6,6 +6,8 @@ import { deckOwnerKey } from '@/lib/decks';
 import { useLang } from '@/lib/lang';
 import { Btn } from './kit';
 import './DeckLibrary.css';
+import { ResponseTypePicker, withResponseType } from './ResponseTypePicker';
+import { Input } from '@/components/ui/input';
 
 const blankQuestion = () => ({ id:uid(), round_type:'classic', text_en:'', text_vi:'', options:Array.from({length:4},()=>({en:'',vi:''})), correct_index:0, setup_line:'', punchline:'', notes:{opener:'',follow_up:'',backup:''}, hint_joke:'', fake_explanations:['',''], media_hint:'', time_limit_s:20, explanation_en:'', explanation_vi:'' });
 const blankDeck = () => ({name:'',description:'',questions:[]});
@@ -18,8 +20,8 @@ function DeckQuestion({question:q,index,count,change,remove,move}) {
   return <details className="hh-deck-question" open={expanded} onToggle={event=>setExpanded(event.currentTarget.open)}>
     <summary><span className="hh-deck-index">{String(index+1).padStart(2,'0')}</span><span><small>{t(q.round_type==='poll'?'pollShort':'triviaShort')}</small><strong>{q[`text_${lang}`]||q.text_en||q.text_vi||t('addQuestion')}</strong></span></summary>
     <div className="hh-deck-question-body">
-      <div className="hh-deck-two"><label>{t('questionType')}<select className="hh-input" value={q.round_type} onChange={e=>update('round_type',e.target.value)}><option value="classic">{t('triviaType')}</option><option value="poll">{t('pollType')}</option></select></label><label>{t('answerTime')}<input className="hh-input" type="number" min={5} max={180} value={q.time_limit_s} onChange={e=>update('time_limit_s',Number(e.target.value))}/></label></div>
-      {q.round_type==='poll'&&<p className="hh-deck-note">{t('pollHelp')}</p>}
+      <ResponseTypePicker id={`deck-question-${index}-response`} value={q.round_type} onChange={mode=>change(withResponseType(q,mode))}/>
+      <label>{t('answerTime')}<Input className="hh-input" type="number" min={5} max={180} value={q.time_limit_s} data-testid={`deck-question-${index}-time`} onChange={e=>update('time_limit_s',Number(e.target.value))}/></label>
       <div className="hh-deck-two">{['en','vi'].map(l=><label key={l}>{t(l==='en'?'promptEn':'promptVi')}<textarea className="hh-input" maxLength={500} rows={3} value={q[`text_${l}`]||''} onChange={e=>update(`text_${l}`,e.target.value)} data-testid={`deck-question-${index}-${l}`}/></label>)}</div>
       <p className="hh-deck-note">{t('secondLanguageHelp')}</p>
       {q.round_type!=='poll'&&<fieldset><legend>{t('answerOptions')}</legend>{[0,1,2,3].map(i=><div className="hh-deck-option" key={i}><span>{String.fromCharCode(65+i)}</span>{['en','vi'].map(l=><label key={l}><span className="sr-only">{t(l==='en'?'optionEn':'optionVi')} {String.fromCharCode(65+i)}</span><input className="hh-input" placeholder={t(l==='en'?'english':'vietnamese')} maxLength={160} value={q.options?.[i]?.[l]||''} data-testid={`deck-option-${index}-${i}-${l}`} onChange={e=>{const options=Array.from({length:4},(_,j)=>({...q.options?.[j]}));options[i][l]=e.target.value;update('options',options);}}/></label>)}</div>)}<label>{t('correctOption')}<select className="hh-input" value={q.correct_index??0} onChange={e=>update('correct_index',Number(e.target.value))}>{[0,1,2,3].map(i=><option value={i} key={i}>{String.fromCharCode(65+i)}</option>)}</select></label></fieldset>}

@@ -7,7 +7,6 @@ import uuid
 
 import pytest
 from fastapi.testclient import TestClient
-from pymongo import MongoClient
 
 
 def uid():
@@ -17,15 +16,16 @@ def uid():
 @pytest.fixture(scope="module")
 def api():
     database = "heckle_deck_test_" + uid()
+    # Isolated test data uses the configured connection; never drop databases.
+    from dotenv import load_dotenv
+    load_dotenv(Path(__file__).parent / ".env")
     previous = {key: os.environ.get(key) for key in ("MONGO_URL", "DB_NAME")}
-    os.environ["MONGO_URL"] = "mongodb://127.0.0.1:27017"
     os.environ["DB_NAME"] = database
     sys.path.insert(0, str(Path(__file__).parent))
     server = importlib.import_module("server")
     with TestClient(server.app) as client:
         yield client
-    with MongoClient("mongodb://127.0.0.1:27017") as mongo:
-        mongo.drop_database(database)
+    # Retain isolated test records; application TTL removes temporary room data.
     for key, value in previous.items():
         if value is None:
             os.environ.pop(key, None)

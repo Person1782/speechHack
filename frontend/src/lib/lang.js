@@ -1,10 +1,12 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { STRINGS, LINES } from "@/i18n";
 
 const LangCtx = createContext(null);
 
 export function LangProvider({ children }) {
   const [lang, setLangState] = useState(() => localStorage.getItem("hh_lang") || "en");
+  useEffect(() => { document.documentElement.lang = lang; }, [lang]);
+
   const setLang = useCallback((l) => {
     localStorage.setItem("hh_lang", l);
     setLangState(l);

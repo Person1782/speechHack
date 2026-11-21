@@ -152,6 +152,16 @@
   .hh-marquee .track { animation: none; }
 }
 
+
+/* Long audience answers must never establish an oversized implicit grid track. */
+.hh-answer-card { min-width: 0; overflow-wrap: anywhere; }
+[data-testid="phone-approved-answers-list"] { grid-template-columns: minmax(0, 1fr); min-width: 0; }
+@media (min-width: 1024px) {
+  :root { --hh-tv-answer-size: clamp(20px, 3vh, 28px); }
+  [data-testid="tv-approved-cards"] .hh-answer-card { padding: var(--hh-space-4); }
+  [data-testid="tv-approved-cards"] .hh-answer-card > p:first-of-type { font-size: var(--hh-tv-answer-size); line-height: 1.3; }
+}
+
 /* Tier 2 workspace: Paper's composition, existing HH palette, no template skin. */
 :root {
   --hh-space-1: .25rem; --hh-space-2: .5rem; --hh-space-3: .75rem; --hh-space-4: 1rem;

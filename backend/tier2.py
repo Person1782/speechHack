@@ -49,7 +49,10 @@ class QuestionInput(BaseModel):
     def valid_question(self):
         if not self.text_en.strip():
             raise ValueError("question_required")
-        if self.round_type != "poll":
+        if self.round_type == "poll":
+            self.options = []
+            self.correct_index = None
+        else:
             if len(self.options) != 4 or any(not o.en.strip() for o in self.options):
                 raise ValueError("four_options_required")
             if self.correct_index not in range(4):

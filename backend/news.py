@@ -77,14 +77,21 @@ class PublishInput(QuestionInput):
 
 
 def normalize_results(data):
-    results = data.get("results", {}).get("web", [])
+    payload = data.get("results") if isinstance(data, dict) else None
+    results = payload.get("web") if isinstance(payload, dict) else None
+    if not isinstance(results, list):
+        return []
     out, seen = [], set()
     for item in results:
         if not isinstance(item, dict):
             continue
         url = str(item.get("url", ""))
-        parsed = urlparse(url)
-        if parsed.scheme not in ("https", "http") or not parsed.hostname or url in seen:
+        try:
+            parsed = urlparse(url)
+            hostname = parsed.hostname
+        except ValueError:
+            continue
+        if parsed.scheme not in ("https", "http") or not hostname or url in seen or len(url) > 2048:
             continue
         title = str(item.get("title") or parsed.hostname)[:500]
         description = str(item.get("description") or "")[:2000]
@@ -93,6 +100,8 @@ def normalize_results(data):
         snippets = snippets or item.get("snippets", []) or []
         if isinstance(snippets, str):
             snippets = [snippets]
+        elif not isinstance(snippets, list):
+            snippets = []
         excerpts = [s[:1600] for s in snippets if isinstance(s, str)][:3]
         if sexual_content(" ".join([title, description, *excerpts])):
             continue
@@ -229,7 +238,7 @@ class NewsService:
         @api.post("/rooms/{code}/news/drafts/{draft_id}/publish", response_model=OK)
         async def publish(code: str, draft_id: str, body: PublishInput, key: Optional[str] = None):
             room = await self.host(code, key)
-            if not body.reviewed or body.round_type != "classic":
+            if not body.reviewed or body.round_type not in ("classic", "poll"):
                 raise HTTPException(400, "news_review_required")
             # Serialize this room's publication; deterministic question id is an additional retry guard.
             lock = self.locks.setdefault(room["code"], asyncio.Lock())

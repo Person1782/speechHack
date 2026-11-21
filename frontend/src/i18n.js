@@ -4,6 +4,15 @@ import { DECK_STRINGS } from './deck-copy';
 
 export const STRINGS = {
   ...DECK_STRINGS,
+  response_type_label: { en: "How should players answer?", vi: "Người chơi trả lời thế nào?" },
+  response_single_choice: { en: "Single choice", vi: "Chọn một đáp án" },
+  response_single_choice_help: { en: "Pick one of four answers.", vi: "Chọn một trong bốn đáp án." },
+  response_open_ended: { en: "Open ended", vi: "Câu hỏi mở" },
+  response_open_ended_help: { en: "Write a response in their own words.", vi: "Tự viết câu trả lời của mình." },
+  response_open_ended_rules: { en: "Up to 80 characters per response. No correct answer needed. You review responses before sharing them for voting.", vi: "Mỗi câu trả lời tối đa 80 ký tự. Không cần đáp án đúng. Bạn duyệt câu trả lời trước khi chia sẻ để bình chọn." },
+  response_single_style: { en: "Single-choice format", vi: "Kiểu câu trắc nghiệm" },
+  response_news_review_open: { en: "I read the source and reviewed this open-ended prompt before adding it to the show.", vi: "Tôi đã đọc nguồn và duyệt câu hỏi mở này trước khi thêm vào show." },
+
   your_material_title: { en: "Your material. Your timing. Your room.", vi: "Chất liệu của bạn. Nhịp diễn của bạn. Khán phòng của bạn." },
   your_material_body: { en: "Write your own questions, build a signature deck, and see the room’s answers before you reveal them.", vi: "Tự viết câu hỏi, tạo bộ câu hỏi mang dấu ấn riêng và xem câu trả lời của khán giả trước khi công bố." },
 
@@ -62,8 +71,8 @@ export const STRINGS = {
   t2_edit_question: { en: "Edit question", vi: "Sửa câu hỏi" },
   t2_translation_help: { en: "Add English and optional Vietnamese. Empty Vietnamese fields use English.", vi: "Thêm tiếng Anh và tiếng Việt nếu muốn. Ô tiếng Việt trống sẽ dùng tiếng Anh." },
   t2_question_type: { en: "Question type", vi: "Loại câu hỏi" },
-  t2_type_classic: { en: "Trivia", vi: "Đố vui" },
-  t2_type_poll: { en: "Poll / Write-in", vi: "Bình chọn / Viết đáp án" },
+  t2_type_classic: { en: "Single choice", vi: "Chọn một đáp án" },
+  t2_type_poll: { en: "Open ended", vi: "Câu hỏi mở" },
   t2_type_decoy: { en: "Decoy question", vi: "Câu hỏi đánh lừa" },
   t2_type_caption: { en: "Caption question", vi: "Câu hỏi chú thích" },
   t2_core: { en: "Question", vi: "Câu hỏi" },

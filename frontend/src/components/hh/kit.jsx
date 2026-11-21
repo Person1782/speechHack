@@ -88,19 +88,8 @@ export function Stamp({ children, color = "#FFE14D", className = "", rotate = -4
   );
 }
 
-export function Marquee({ items, testid = "ticker" }) {
-  if (!items || !items.length) return null;
-  const doubled = [...items, ...items];
-  const dur = Math.max(20, items.join(" ").length * 0.22);
-  return (
-    <div className="hh-marquee" data-testid={testid}>
-      <div className="track" style={{ animationDuration: `${dur}s` }}>
-        {doubled.map((x, i) => (
-          <span key={i} className="item">{x}<span className="sep">✶</span></span>
-        ))}
-      </div>
-    </div>
-  );
+export function Marquee() {
+  return null;
 }
 
 export function FullCenter({ children, className = "" }) {
